@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+    <title>Ticker</title>
+    <style>
+
+    #tape
+    {
+        position: absolute; 
+        margin-left: 0px; 
+        top:0;
+        background-color: #fff;
+    }
+    #debug
+    {
+       position: absolute; 
+	   top:160px;
+    }
+	</style>
+	<script src="jquery-3.2.1.min.js"></script>
+
+	<script language="JavaScript">
+	    window.requestAnimFrame = (function(){
+	      return  window.requestAnimationFrame       || 
+	              window.webkitRequestAnimationFrame || 
+	              window.mozRequestAnimationFrame    || 
+	              window.oRequestAnimationFrame      || 
+	              window.msRequestAnimationFrame     || 
+	              function(callback, element){window.setTimeout(callback, TickerState.interval);};
+	    })();
+
+	    var TickerState = {
+			canvas: undefined,
+			ctx: undefined,
+			font: "40px sans-serif", 
+			textAlign: "left",
+			fillStyle: "black", 
+			tickerX: 0,
+			dataWidth: 0,
+			interval: 1
+		};
+	    
+		function animate()
+		{
+			requestAnimFrame(MoveTicker);
+		}
+
+		function Ticker(divId, canvasId, items)
+	    {
+	        ticker                    = document.getElementById(divId);
+	        maxWidth                  = parseInt(ticker.style.width);
+			var canvas		          = document.createElement("canvas");
+			var ctx			          = canvas.getContext('2d');
+	        ctx.font                  = TickerState.font;
+	        ctx.textAlign             = TickerState.textAlign;
+            ctx.fillStyle             = TickerState.fillStyle;
+	        var x	                  = 10;
+	        var x1	                  = x;
+	        var count_width           = x;
+	        var y                     = 45;
+	        var firstTime             = true;
+	        var txt                   = ""
+	        for (var j = 0; j < 4; j++) // try to put feed more than one in a canvas to get no interuption at and
+	        {
+		        for (var i = 0; i < items.length; i++)
+	            {
+					count_width  += ctx.measureText(items[i].Symbol).width;
+					count_width  += ctx.measureText(items[i].Value).width;
+					if (count_width < 16384) // max canvas size. If exceeds canvas will render empty
+					{
+						txt += items[i].Symbol+items[i].Value;
+						x1  = count_width;
+						$("#debug").append((i+1) +". "+ items[i].Symbol+"<br />");
+					}	
+	            }
+	            if (firstTime)
+	            {
+	                TickerState.dataWidth = x1;
+	                firstTime = false;
+	            }
+	        }
+ 			delete ctx;
+ 			delete canvas;
+			TickerState.canvas        = document.getElementById(canvasId);
+			TickerState.canvas.width  = TickerState.dataWidth;
+			TickerState.ctx           = TickerState.canvas.getContext('2d');
+			TickerState.ctx.font      = TickerState.font;
+			TickerState.ctx.textAlign = TickerState.textAlign;
+			TickerState.ctx.fillStyle = TickerState.fillStyle;
+			TickerState.ctx.fillText(txt, x, y);
+			animate();
+	    }
+	
+	    function MoveTicker()
+	    {
+			TickerState.tickerX += 1;
+			if (TickerState.tickerX >= TickerState.dataWidth)
+				TickerState.tickerX = 10;
+			TickerState.canvas.style.marginLeft = "-" + TickerState.tickerX.toString() + "px";
+			TickerState.canvas.style.clip = "rect(0px " + (maxWidth + TickerState.tickerX).toString() + "px 80px -" + TickerState.tickerX.toString() + "px)";
+			animate();
+	    }
+
+	    function displayRSS(feed)
+	    {
+	        var items = [];
+			for (var i = 0; i < feed.query.count; i++)
+	        {
+				items.push({ Symbol: feed.query.results.item[i].title, Value: " +++ " });
+	        }
+	        Ticker("ticker", "tape", items);
+	    }
+	
+		function parseRSS(url, callback)
+		{
+			var yql = "https://query.yahooapis.com/v1/public/yql?q=select%20title%2Clink%2Cdescription%20from%20rss%20where%20url%3D%22"+encodeURIComponent(url)+"%3Fformat%3Dxml%22&format=json&diagnostics=true&callback=";
+			$.getJSON(yql, function(result)
+			{
+				callback(result);   
+			}, "jsonp");
+		}
+		
+	    $(document).ready(function()
+	    {              
+	        parseRSS("https://www.n-tv.de/rss", displayRSS);
+	    });
+	</script>
+
+</head>
+<body>
+
+	<div id="ticker" style="width:1920px;">
+		<canvas id="tape" width="auto" height="80">Your browser doesn't support canvas</canvas>
+	</div>
+
+	<div id="debug">
+	</div>
+
+</body>
+</html>

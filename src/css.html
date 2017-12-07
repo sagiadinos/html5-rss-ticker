@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+    <title>Ticker</title>
+    <style>
+		@keyframes customticker {
+		0% {
+			-webkit-transform: translate3d(100%, 0, 0);
+			transform: translate3d(100%, 0, 0);
+			visibility: visible;
+		}
+		100% {
+			-webkit-transform: translate3d(-100%, 0, 0);
+			transform: translate3d(-100%, 0, 0);
+		}
+		}
+
+
+		/* Formatting the full-width ticker wrapper background and font color */
+		#tickerwrap {
+		width: 100%;
+		overflow: hidden;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		}
+
+
+		/* Formatting the ticker content background, font color, padding and exit state */
+		#ticker {
+		display: inline-block;
+		white-space: nowrap;
+		-webkit-animation-iteration-count: infinite;
+		animation-iteration-count: infinite;
+		-webkit-animation-timing-function: linear;
+		animation-timing-function: linear;
+		-webkit-animation-name: customticker;
+		animation-name: customticker;
+		-webkit-animation-duration: 7s;
+		animation-duration: 7s;
+		}
+   
+	</style>
+	<script src="jquery-3.2.1.min.js"></script>
+
+	<script language="JavaScript">
+	    
+	    function displayRSS(feed)
+	    {
+	        var items = [];
+			for (var i = 0; i < feed.query.count; i++)
+	        {
+				$(".ticker").append('<div class="ticker__item">' + feed.query.results.item[i].title + '</div>');
+	        }
+	    }
+	
+		function parseRSS(url, callback)
+		{
+			var yql = "https://query.yahooapis.com/v1/public/yql?q=select%20title%2Clink%2Cdescription%20from%20rss%20where%20url%3D%22"+encodeURIComponent(url)+"%3Fformat%3Dxml%22&format=json&diagnostics=true&callback=";
+			$.getJSON(yql, function(result)
+			{
+				callback(result);   
+			}, "jsonp");
+		}
+		
+	    $(document).ready(function()
+	    {              
+	        parseRSS("https://www.n-tv.de/rss", displayRSS);
+	    });
+	</script>
+
+</head>
+<body>
+	<div class="ticker-wrap">
+		<div class="ticker">
+		</div>
+	</div>
+
+</body>
+</html>
