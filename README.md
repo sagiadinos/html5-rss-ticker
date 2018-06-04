@@ -12,4 +12,4 @@ https://smil-control.de/category/smilcontrol-academy/workshop/digital-signage-ne
 
 
 Workshop in english (translation in progress)
-https://smil-control.de/category/smilcontrol-academy/workshop/digital-signage-newsticker/
+https://smil-control.com/category/smilcontrol-academy/workshop/digital-signage-news-ticker/
