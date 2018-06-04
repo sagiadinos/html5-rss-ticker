@@ -1,5 +1,11 @@
 # html5-rss-ticker
 
-## demo
+Proof of concept for html5 ticker techniques
 
-http://saghiadinos.com/html5/ticker/
+ - CSS3-Keyxftames
+ - HTML-Canvas
+ - SMIL
+ - marquee (deprected)
+
+
+

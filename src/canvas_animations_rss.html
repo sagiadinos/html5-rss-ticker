@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>SmilControl Canvas Ticker</title>
+		<style>
+			#myTicker
+			{
+				position: absolute; 
+				left: 0;
+				top:0;	
+			}
+		</style>
+		<script>
+			window.addEventListener('resize', resizeCanvas, false);
+const _move_pixel        = 1;
+const _max_canvas_width  = 16384;
+var MyCanvas	         = {};
+var ctx		             = {};
+var x                    = 0;
+var ticker_content       = "";
+var text_width           = 0;
+
+			function initCanvas()
+			{
+				MyCanvas = document.getElementById("myTicker");
+				ctx    = MyCanvas.getContext("2d");
+			}
+
+			function resizeCanvas()
+			{
+				MyCanvas.width = window.innerWidth;
+				ctx.font       = "30px Arial";
+				text_width     = ctx.measureText(ticker_content).width;
+				x              = MyCanvas.width;
+			}			
+
+			function isNewContentSizeValid(txt)
+			{
+					return (ctx.measureText(txt).width  < _max_canvas_width);
+			}
+
+
+			function moveTicker()
+			{
+				ctx.clearRect(0,0, MyCanvas.width, 80);
+				if (x > -text_width)
+					x = x - _move_pixel;
+				else
+					x = MyCanvas.width;
+				ctx.fillText(ticker_content, x, 50);	
+				window.requestAnimationFrame(moveTicker);
+			}
+
+			function displayTicker(ticker_text)
+			{
+				ticker_content = ticker_text;
+				resizeCanvas();
+				window.requestAnimationFrame(moveTicker);
+			}
+
+			function createTickerOutput(feed_obj)
+			{
+				var ticker_text = " +++ ";
+				var tmp_text    = "";
+				for (var i = 0; i < feed_obj.query.count; i++)
+				{
+					tmp_text =  feed_obj.query.results.item[i].title+ " +++ ";
+					if (isNewContentSizeValid(ticker_text + tmp_text))
+						ticker_text += tmp_text;
+					else
+						break;
+
+				}
+				return ticker_text;
+			}
+
+
+			function handleTicker(response)
+			{
+				var feed_obj    = JSON.parse(response);
+				var ticker_text = createTickerOutput(feed_obj);
+				displayTicker(ticker_text, feed_obj.query.count);			
+			}		
+
+			function getRSS(url)
+			{
+				var request_url = 'https://query.yahooapis.com/v1/public/yql?q=select title from rss where url="'+url+'"&format=json';
+				var MyRequest = new XMLHttpRequest(); // a new request
+				MyRequest.open("GET", request_url, true);
+				MyRequest.onload = function (e)
+				{
+					if (MyRequest.readyState === 4)
+					{
+						if (MyRequest.status === 200)
+						{
+							handleTicker(MyRequest.responseText);
+						}
+						else
+						{
+							console.error(MyRequest.statusText);
+						}
+					}
+				};
+				MyRequest.onerror = function (e)
+				{
+					console.error(MyRequest.statusText);
+				};
+				MyRequest.send(null);
+				return;
+			}
+
+			function start()
+			{
+				initCanvas();
+				getRSS("https://smil-control.de/blog/feed");
+			}		
+
+		</script>	
+	<body onload="start()">
+		<canvas id="myTicker" width="auto" height="80">No Canvas</canvas>
+	</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>SVG/SMIL Newsticker with RSS</title>
+		<script>
+			
+			function displayTicker(ticker_text, num_headlines)
+			{
+				document.getElementById("svg_ticker").innerHTML = ticker_text +
+							'<animate attributeName="x" from="100%" to="-100%" dur="' +
+							getAnimDurationInSeconds(num_headlines) +
+							'" repeatCount="indefinite"/>';
+			}
+
+			function getAnimDurationInSeconds(num_headlines)
+			{
+				var seconds = num_headlines*10;
+				return seconds.toString()+"s";
+			}
+
+			function createTickerOutput(feed_obj)
+			{
+				var ticker_text = "";
+				for (var i = 0; i < feed_obj.query.count; i++)
+				{
+					ticker_text += feed_obj.query.results.item[i].title+ " +++ ";
+					var animation_seconds = 0;
+				}
+				return ticker_text;
+			}
+		
+		function handleTicker(response)
+		{
+			var feed_obj    = JSON.parse(response);
+			var ticker_text = createTickerOutput(feed_obj);
+			displayTicker(ticker_text, feed_obj.query.count);			
+		}		
+		
+		function getRSS(url)
+		{
+			var request_url = 'https://query.yahooapis.com/v1/public/yql?q=select title from rss where url="'+url+'"&format=json';
+			var MyRequest = new XMLHttpRequest(); // a new request
+			MyRequest.open("GET", request_url, true);
+			MyRequest.onload = function (e)
+			{
+				if (MyRequest.readyState === 4)
+				{
+					if (MyRequest.status === 200)
+					{
+						handleTicker(MyRequest.responseText);
+					}
+					else
+					{
+						console.error(MyRequest.statusText);
+					}
+				}
+			};
+			MyRequest.onerror = function (e)
+			{
+				console.error(MyRequest.statusText);
+			};
+			MyRequest.send(null);
+			return;
+		}
+
+		function start()
+		{
+			getRSS("https://smil-control.de/blog/feed");
+		}		
+
+1	</script>	
+	<body onload="start()">
+		<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="80px">
+		
+			<text id="svg_ticker" x="0" y="30" fill="black" font-size="30px" font-family="Arial">
+				 
+			</text>
+		</svg>
+	</body>
+</html>

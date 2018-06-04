@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Old School Marquee Newsticker</title>
+		<script language="JavaScript">
+			
+			function displayTicker(ticker_text)
+			{
+				document.getElementById("old_school").innerHTML = ticker_text;
+			}
+
+			function setAnimDurationInSeconds(num)
+			{
+				var seconds = num*10;
+				//document.getElementById("ticker").style.animationDuration = seconds.toString()+"s";
+			}
+
+			function createTickerOutput(feed_obj)
+			{
+				var ticker_text = "";
+				for (var i = 0; i < feed_obj.query.count; i++)
+				{
+					ticker_text += feed_obj.query.results.item[i].title+ " +++ ";
+					var animation_seconds = 0;
+				}
+				return ticker_text;
+			}
+		
+		function handleTicker(response)
+		{
+			var feed_obj    = JSON.parse(response);
+			var ticker_text = createTickerOutput(feed_obj);
+			displayTicker(ticker_text, feed_obj.query.count);			
+		}		
+		
+		function getRSS(url)
+		{
+			var request_url = 'https://query.yahooapis.com/v1/public/yql?q=select title from rss where url="'+url+'"&format=json';
+			var MyRequest = new XMLHttpRequest(); // a new request
+			MyRequest.open("GET", request_url, true);
+			MyRequest.onload = function (e)
+			{
+				if (MyRequest.readyState === 4)
+				{
+					if (MyRequest.status === 200)
+					{
+						handleTicker(MyRequest.responseText);
+					}
+					else
+					{
+						console.error(MyRequest.statusText);
+					}
+				}
+			};
+			MyRequest.onerror = function (e)
+			{
+				console.error(MyRequest.statusText);
+			};
+			MyRequest.send(null);
+			return;
+		}
+
+		function start()
+		{
+			getRSS("https://smil-control.de/blog/feed");
+		}		
+
+1	</script>	
+	<body onload="start()">
+		<marquee id="old_school" style="font:30px Arial"></marquee>
+	</body>
+</html>
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <style></style>
+  </head>
+  <body>
+  </body>
+</html>
