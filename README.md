@@ -10,6 +10,5 @@ Proof of concept for html5 news ticker techniques
 Workshop in german
 https://smil-control.de/category/smilcontrol-academy/workshop/digital-signage-newsticker
 
-
-Workshop in english (translation in progress)
+Workshop in english
 https://smil-control.com/category/smilcontrol-academy/workshop/digital-signage-news-ticker/
